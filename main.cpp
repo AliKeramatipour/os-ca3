@@ -22,6 +22,7 @@ const int MAX_CARS  = 100;
 const int MAX_EDGES = 100;
 
 high_resolution_clock::time_point tStart;
+sem_t locks[MAX_EDGES];
 
 duration<double, std::milli> getTime()
 {
@@ -35,11 +36,16 @@ public:
     {
         h = initH;
         string address = "/s" + to_string(cnt);
-        semaphore = sem_open(address.c_str(), O_CREAT, 0644, 1);
+        sem_init(&locks[cnt] , 0,1);
+        semaphore = &locks[cnt];
     }
     pair<long double, pair<duration<double, std::milli> ,duration<double, std::milli> > > acquireAndCalculate( int p )
     {
         long double res = 0 ;
+        /*
+        int SEMRES = 0;
+        cout << " here " << sem_getvalue(semaphore, &SEMRES) << " :: " << SEMRES << endl ;
+        cout << "locking on semaphore" << endl ;*/
         sem_wait(semaphore);
         auto tEntrance = getTime();
         for (int i = 0 ; i < 1e7 ; i++)
