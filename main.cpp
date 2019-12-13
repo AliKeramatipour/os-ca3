@@ -22,7 +22,6 @@ const int MAX_CARS  = 100;
 const int MAX_EDGES = 100;
 
 high_resolution_clock::time_point tStart;
-sem_t locks[MAX_EDGES];
 
 duration<double, std::milli> getTime()
 {
@@ -32,10 +31,11 @@ duration<double, std::milli> getTime()
 }
 class Monitor{
 public:
-    void intialize_sem(int cnt , int initH)
+    void intialize_sem(int cnt , int initH, string a, string b)
     {
+        f = a ; s = b ;
         h = initH;
-        string address = "/s" + to_string(cnt);
+        string address = to_string(cnt);
         semaphore = sem_open(address.c_str(), O_CREAT, 0644, 1);
         //sem_init(&locks[cnt] , 0,1);
         //semaphore = &locks[cnt];
@@ -43,22 +43,19 @@ public:
     pair<long double, pair<duration<double, std::milli> ,duration<double, std::milli> > > acquireAndCalculate( int p )
     {
         long double res = 0 ;
-        /*
-        int SEMRES = 0;
-        cout << " here " << sem_getvalue(semaphore, &SEMRES) << " :: " << SEMRES << endl ;
-        cout << "locking on semaphore" << endl ;*/
-        sem_wait(semaphore);
+        sem_wait(this -> semaphore);
         auto tEntrance = getTime();
         for (int i = 0 ; i < 1e7 ; i++)
         {
-            res += i / (1e6 * h * p) ;
+            res += (long double)i / (long double)(1e6 * h * p) ;
         }
         auto tExit = getTime();
-        sem_post(semaphore);
+        sem_post(this -> semaphore);
         return {res, {tEntrance, tExit}} ;
     }
 private:
     sem_t *semaphore;
+    string f , s ;
     int h ;
 };
 
@@ -82,8 +79,8 @@ void run_car(int pathNumber, int carNumber)
         auto result = thisEdge -> acquireAndCalculate(pCars[pathNumber][carNumber]);
 
         sem_wait(total_emission_lock);
-        total_emission++;
-        //total_emission = total_emission + result.first ;
+        total_emission += result.first;
+        total_emission = total_emission + result.first ;
         sem_post(total_emission_lock);
 
         outFile << paths[pathNumber][i] << " " << result.second.first.count() << " " << paths[pathNumber][i + 1] << " " << result.second.second.count() << " " << result.first << " " << total_emission << endl;
@@ -130,7 +127,8 @@ int main(int argc, char *argv[]) {
                 s[cnt].push_back(inp[i]);
         }
         edges[{s[0], s[1]}] = &pMonitor[edgeCnt];
-        pMonitor -> intialize_sem(edgeCnt++, stoi(s[2]));
+        pMonitor[edgeCnt].intialize_sem(edgeCnt, stoi(s[2]), s[0], s[1]);
+        edgeCnt++;
     }
 
     thread cars[MAX_PATHS][MAX_CARS];
