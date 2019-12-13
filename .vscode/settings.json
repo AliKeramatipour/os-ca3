@@ -1,6 +1,10 @@
 {
     "files.associations": {
         "utility": "cpp",
-        "iosfwd": "cpp"
+        "iosfwd": "cpp",
+        "map": "cpp",
+        "chrono": "cpp",
+        "fstream": "cpp",
+        "locale": "cpp"
     }
 }
