@@ -36,8 +36,9 @@ public:
     {
         h = initH;
         string address = "/s" + to_string(cnt);
-        sem_init(&locks[cnt] , 0,1);
-        semaphore = &locks[cnt];
+        semaphore = sem_open(address.c_str(), O_CREAT, 0644, 1);
+        //sem_init(&locks[cnt] , 0,1);
+        //semaphore = &locks[cnt];
     }
     pair<long double, pair<duration<double, std::milli> ,duration<double, std::milli> > > acquireAndCalculate( int p )
     {
@@ -129,7 +130,7 @@ int main(int argc, char *argv[]) {
                 s[cnt].push_back(inp[i]);
         }
         edges[{s[0], s[1]}] = &pMonitor[edgeCnt];
-        pMonitor -> intialize_sem(edgeCnt, stoi(s[2]));
+        pMonitor -> intialize_sem(edgeCnt++, stoi(s[2]));
     }
 
     thread cars[MAX_PATHS][MAX_CARS];
