@@ -72,7 +72,7 @@ sem_t *total_emission_lock ;
 void run_car(int pathNumber, int carNumber)
 {
     ofstream outFile;
-    outFile.open(to_string(pathNumber) + "-" + to_string(carNumber));
+    outFile.open(to_string(pathNumber) + "-" + to_string(carNumber) + ".txt");
 
     for ( int i = 0 ; i < paths[pathNumber].size() - 1 ; i++)
     {
