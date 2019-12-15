@@ -1,18 +1,5 @@
-#include <iostream>
-#include <ctime>
-#include <map>
-#include <string>
-#include <thread>
-#include <semaphore.h> 
-#include <unistd.h> 
-#include <pthread.h>
-#include <stdio.h> 
-#include <fstream>
-#include <vector>
-#include <fcntl.h>
-#include <chrono>
-#include <ctime>
-#include <ratio>
+
+#include "monitor.hpp"
 
 using namespace std;
 using namespace std::chrono;
@@ -21,43 +8,6 @@ const int MAX_PATHS = 100;
 const int MAX_CARS  = 100;
 const int MAX_EDGES = 100;
 
-high_resolution_clock::time_point tStart;
-
-duration<double, std::milli> getTime()
-{
-    high_resolution_clock::time_point tNow = high_resolution_clock::now();
-    duration<double, std::milli> time_span = tNow - tStart;
-    return time_span;
-}
-class Monitor{
-public:
-    void intialize_sem(int cnt , int initH, string a, string b)
-    {
-        f = a ; s = b ;
-        h = initH;
-        string address = to_string(cnt);
-        semaphore = sem_open(address.c_str(), O_CREAT, 0644, 1);
-        //sem_init(&locks[cnt] , 0,1);
-        //semaphore = &locks[cnt];
-    }
-    pair<long double, pair<duration<double, std::milli> ,duration<double, std::milli> > > acquireAndCalculate( int p )
-    {
-        long double res = 0 ;
-        sem_wait(this -> semaphore);
-        auto tEntrance = getTime();
-        for (int i = 0 ; i < 1e7 ; i++)
-        {
-            res += (long double)i / (long double)(1e6 * h * p) ;
-        }
-        auto tExit = getTime();
-        sem_post(this -> semaphore);
-        return {res, {tEntrance, tExit}} ;
-    }
-private:
-    sem_t *semaphore;
-    string f , s ;
-    int h ;
-};
 
 vector<string> paths[MAX_PATHS];
 Monitor pMonitor[MAX_EDGES];
@@ -84,7 +34,8 @@ void run_car(int pathNumber, int carNumber)
         sem_post(total_emission_lock);
 
         outFile << paths[pathNumber][i] << " " << result.second.first.count() << " " << paths[pathNumber][i + 1] << " " << result.second.second.count() << " " << result.first << " " << total_emission << endl;
-        cout << pathNumber << " : " << carNumber << endl << paths[pathNumber][i] << " " << result.second.first.count() << " " << paths[pathNumber][i + 1] << " " << result.second.second.count() << " " << result.first << " " << total_emission << endl;
+        if ( paths[pathNumber][i][0] == 'B'  )
+            cout << pathNumber << " : " << carNumber << endl << paths[pathNumber][i] << " " << result.second.first.count() << " " << paths[pathNumber][i + 1] << " " << result.second.second.count() << " " << result.first << " " << total_emission << endl;
 
     }
     outFile.close();
@@ -107,6 +58,7 @@ void pathDecompose(int num)
 }
 
 int main(int argc, char *argv[]) {
+    srand(time(NULL));
     tStart = high_resolution_clock::now();
     total_emission_lock = sem_open("/total_emission_lock", O_CREAT, 0644, 1);
 
@@ -154,8 +106,6 @@ int main(int argc, char *argv[]) {
 
     for ( int i = 0 ; i < thread_joins.size() ; i++ )
         cars[thread_joins[i].first][thread_joins[i].second].join();
-
-    
 
 	return 0;
 }
