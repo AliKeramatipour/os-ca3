@@ -34,9 +34,6 @@ void run_car(int pathNumber, int carNumber)
         sem_post(total_emission_lock);
 
         outFile << paths[pathNumber][i] << " " << result.second.first.count() << " " << paths[pathNumber][i + 1] << " " << result.second.second.count() << " " << result.first << " " << total_emission << endl;
-        if ( paths[pathNumber][i][0] == 'B'  )
-            cout << pathNumber << " : " << carNumber << endl << paths[pathNumber][i] << " " << result.second.first.count() << " " << paths[pathNumber][i + 1] << " " << result.second.second.count() << " " << result.first << " " << total_emission << endl;
-
     }
     outFile.close();
 }
