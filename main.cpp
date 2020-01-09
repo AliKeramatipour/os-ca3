@@ -33,7 +33,7 @@ void run_car(int pathNumber, int carNumber)
         total_emission = total_emission + result.first ;
         sem_post(total_emission_lock);
 
-        outFile << paths[pathNumber][i] << " " << result.second.first.count() << " " << paths[pathNumber][i + 1] << " " << result.second.second.count() << " " << result.first << " " << total_emission << endl;
+        outFile << paths[pathNumber][i] << ", " << result.second.first << ", " << paths[pathNumber][i + 1] << ", " << result.second.second << ", " << result.first << ", " << total_emission << endl;
     }
     outFile.close();
 }
